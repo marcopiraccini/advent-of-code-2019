@@ -1,8 +1,16 @@
-extern crate aoc_runner;
+// Days
+pub mod day01;
 
-#[macro_use]
-extern crate aoc_runner_derive;
+pub fn noop(_inp: String) {}
 
-pub mod day1;
+pub type DayFn = fn(String);
 
-aoc_lib!{ year = 2019 }
+pub fn get_day(day: u32) -> (DayFn, DayFn) {
+    match day {
+        1 => (day01::part1, day01::part2),
+        _ => {
+            println!("Unknown day: {}", day);
+            (noop, noop)
+        }
+    }
+}

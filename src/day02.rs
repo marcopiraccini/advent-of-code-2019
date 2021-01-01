@@ -33,6 +33,27 @@ pub fn part1(mut input: String) {
     println!("Solution part 1: {:?}", res[0])
 }
 
+pub fn part2(mut input: String) {
+    input.pop(); // removes the trailing \n
+    let insts = input.split(',').map(|x| x.parse::<usize>().unwrap()).collect::<Vec<usize>>();
+    let output = 19690720;
+
+    for first in 0..99 {
+        for second in 0..99 { 
+            let mut mem = insts.to_vec();
+            mem[1] = first;
+            mem[2] = second;
+            let res = process(mem);
+            if res[0] == output {
+                println!("{}, {}", first, second);
+                let solution = 100 * first + second;
+                println!("Solution part 2: {}", solution);
+                return;
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     // Note this useful idiom: importing names from outer (for mod tests) scope.

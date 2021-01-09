@@ -1,5 +1,4 @@
-use std::fmt;
-use std::collections::HashSet;
+use std::collections::{HashSet, HashMap};
 
 enum Dir {
     Right, Left, Up, Down
@@ -12,48 +11,34 @@ struct Mov {
 
 struct Pos {
     x: isize,
-    y: isize
+    y: isize,
+    step: usize    
 }
 
-// to print it we need this trait
-// see: https://doc.rust-lang.org/rust-by-example/hello/print/print_display.html
-impl fmt::Debug for Mov {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        // Write strictly the first element into the supplied output
-        // stream: `f`. Returns `fmt::Result` which indicates whether the
-        // operation succeeded or failed. Note that `write!` uses syntax which
-        // is very similar to `println!`.
-        let dir = match self.dir {
-            Dir::Right => "Right",
-            Dir::Left => "Left", 
-            Dir::Up => "Up", 
-            Dir::Down => "Down",
-        };
-        write!(f, "- {}: {}", dir, self.n)
-    }
-}
-
-fn move_to(pos: Pos, movx: isize, movy: isize, visited: &mut HashSet<(isize, isize)>) -> Pos {
+fn move_to(pos: Pos, movx: isize, movy: isize, visited: &mut HashMap<(isize, isize), usize>) -> Pos {
     let mut curr_x = pos.x;
     let mut curr_y = pos.y;
+    let mut curr_step = pos.step;
     if movx.abs() != 0 {
         for _ in 1..movx.abs() + 1 {
             if movx > 0 { curr_x += 1; } else { curr_x -= 1; }
-            visited.insert((curr_x, curr_y));
+            curr_step += 1;
+            visited.insert( (curr_x,curr_y), curr_step);
         }
     }
     if movy != 0 {
         for _ in 1..movy.abs() + 1 {
             if movy > 0 { curr_y += 1; } else { curr_y -= 1; }
-            visited.insert((curr_x, curr_y));
+            curr_step += 1;
+            visited.insert((curr_x, curr_y), curr_step);
         }
     }
-    Pos {x: curr_x, y:curr_y}
+    Pos {x: curr_x, y:curr_y, step: curr_step}
 }
 
-fn apply_path(path: &[Mov]) -> HashSet<(isize, isize)> {
-    let mut pos = Pos { x: 0, y: 0};
-    let mut visited: HashSet<(isize, isize)> = HashSet::new();
+fn apply_path(path: &[Mov]) -> HashMap<(isize, isize), usize> {
+    let mut pos = Pos { x: 0, y: 0, step: 0};
+    let mut visited: HashMap<(isize, isize), usize> = HashMap::new();
     for mov in path {
         match mov.dir {
             Dir::Right => pos = move_to(pos, mov.n, 0, &mut visited),
@@ -65,12 +50,24 @@ fn apply_path(path: &[Mov]) -> HashSet<(isize, isize)> {
     visited
 }
 
-fn manhattan(pos: (isize, isize)) -> usize {
-    (pos.0.abs() + pos.1.abs()) as usize
+fn manhattan(x: isize, y: isize) -> usize {
+    (x.abs() + y.abs()) as usize
 }
 
+fn get_intersections(lines: Vec<Vec<Mov>>) -> Vec<(isize, isize)> {
+    let line1 = &lines[0];
+    let line2 = &lines[1];
+    let visited1 = apply_path(&line1);
+    let visited2 = apply_path(&line2);
 
-pub fn _part1(mut input: String) -> usize {
+    let set1: HashSet<(isize, isize)> = visited1.keys().copied().collect(); 
+    let set2: HashSet<(isize, isize)> = visited2.keys().copied().collect();
+    // https://stackoverflow.com/questions/31217518/why-does-cloned-allow-this-function-to-compile
+    // Basically, the iterator is on references, with cloned we get the instances
+    set1.intersection(&set2).cloned().collect()
+}
+
+fn get_lines(mut input: String) -> Vec<Vec<Mov>> {
     input.pop(); // removes the trailing \n
     let lines: Vec<Vec<Mov>> = input.lines().map(|l| {
         l.split(',').map(|x| {
@@ -89,19 +86,28 @@ pub fn _part1(mut input: String) -> usize {
             Mov {dir, n}
         }).collect::<Vec<Mov>>()
     }).collect();  
+    lines
+}
 
-    let line1 = &lines[0];
-    let line2 = &lines[1];
-    let visited1 = apply_path(&line1);
-    let visited2 = apply_path(&line2);
-    let visited_both = visited1.intersection(&visited2);
-    let dists = visited_both.map(|point| manhattan(*point)); 
+fn _part1(input: String) -> usize {
+    let lines = get_lines(input);
+    let visited_both = get_intersections(lines);
+    let dists = visited_both.iter().map(|p| manhattan(p.0, p.1)); 
     dists.min().unwrap()
 }
 
 pub fn part1(input: String) {
     let min = _part1(input); 
-    println!("Solution: {:?}", min); 
+    println!("    Solution: {:?}", min); 
+}
+
+pub fn  part2(input: String) {
+    let lines = get_lines(input);
+    let visited1 = apply_path(&lines[0]);
+    let visited2 = apply_path(&lines[1]);
+    let visited_both = get_intersections(lines);
+    let min = visited_both.iter().map(|v| visited1.get(&v).unwrap() + visited2.get(&v).unwrap()).min();
+    println!("    Solution: {:?}", min.unwrap()); 
 }
 
 

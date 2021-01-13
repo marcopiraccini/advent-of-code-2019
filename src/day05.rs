@@ -28,12 +28,51 @@ fn process(mut insts: Vec<isize>, input: isize) -> isize {
             },
             4 => {
                 let first = if first_direct {insts[curr + 1]} else { insts[insts[curr + 1] as usize] };
-                println!("output: {}", first);
                 if first != 0 {return first};
                 curr += 2;
             },
+            5 => {
+                let first = if first_direct {insts[curr + 1]} else { insts[insts[curr + 1] as usize] };
+                let second = if second_direct {insts[curr + 2]} else { insts[insts[curr + 2] as usize] };
+                if first != 0 {
+                    curr = second as usize;
+                } else {
+                    curr += 3;
+                }
+            },
+            6 => {
+                let first = if first_direct {insts[curr + 1]} else { insts[insts[curr + 1] as usize] };
+                let second = if second_direct {insts[curr + 2]} else { insts[insts[curr + 2] as usize] };
+                if first == 0 {
+                    curr = second as usize;
+                } else {
+                    curr += 3;
+                }
+            },
+            7 => {
+                let first = if first_direct {insts[curr + 1]} else { insts[insts[curr + 1] as usize] };
+                let second = if second_direct {insts[curr + 2]} else { insts[insts[curr + 2] as usize] };
+                let target = insts[curr + 3] as usize; 
+                if first < second {
+                    insts[target] = 1;
+                } else {
+                    insts[target] = 0;
+                }
+                curr += 4;
+            },
+            8 => {
+                let first = if first_direct {insts[curr + 1]} else { insts[insts[curr + 1] as usize] };
+                let second = if second_direct {insts[curr + 2]} else { insts[insts[curr + 2] as usize] };
+                let target = insts[curr + 3] as usize; 
+                if first == second {
+                    insts[target] = 1;
+                } else {
+                    insts[target] = 0;
+                }
+                curr += 4;
+            },
             // do nothing on other cases
-            _ => {} 
+            _ => { return 0 } 
         }
     }
     0
@@ -43,26 +82,25 @@ fn process(mut insts: Vec<isize>, input: isize) -> isize {
 pub fn part1(mut input: String) {
     input.pop(); // removes the trailing \n
     let insts = input.split(',').map(|x| x.parse::<isize>().unwrap()).collect::<Vec<isize>>();
-    let res = process(insts, 1); 
-    println!("Solution part 1: {:?}", res)
+    let res = process(insts.clone(), 1); 
+    println!("Solution part 1: {:?}", res);
+    let res2 = process(insts, 5); 
+    println!("Solution part 2: {:?}", res2);
 }
 
 
-//#[cfg(test)]
-//mod tests {
-    //// Note this useful idiom: importing names from outer (for mod tests) scope.
-    //use super::*;
+#[cfg(test)]
+mod tests {
+    // Note this useful idiom: importing names from outer (for mod tests) scope.
+    use super::*;
 
-    //#[test]
-    //fn test_day05_part1() {
-        //// vec! macro: ioc.rust-lang.org/std/macro.vec.html
-        //// Also, we cannot compare vectors directly, but we can compare slices:
-        //let mut res = process(vec![1,0,0,0,99], 0);
-        //let mut expected = vec![2,0,0,0,99];
-        //assert_eq!(&res[0..res.len()], &expected[0..expected.len()]);
-        
-        //res =  process(vec![1,1,1,4,99,5,6,0,99], 0);
-        //expected = vec![30,1,1,4,2,5,6,0,99];
-        //assert_eq!(&res[0..res.len()], &expected[0..expected.len()]);
-    //}
-//}
+    #[test]
+    fn day05_part2() {
+        // vec! macro: ioc.rust-lang.org/std/macro.vec.html
+        // Also, we cannot compare vectors directly, but we can compare slices:
+        let mut res = process(vec![3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9], 0);
+        assert_eq!(res, 0);
+        res = process(vec![3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9], 1);
+        assert_eq!(res, 1);
+    }
+}

@@ -82,12 +82,16 @@ fn process(mut insts: Vec<isize>, input: isize) -> isize {
 pub fn part1(mut input: String) {
     input.pop(); // removes the trailing \n
     let insts = input.split(',').map(|x| x.parse::<isize>().unwrap()).collect::<Vec<isize>>();
-    let res = process(insts.clone(), 1); 
+    let res = process(insts, 1); 
     println!("Solution part 1: {:?}", res);
-    let res2 = process(insts, 5); 
-    println!("Solution part 2: {:?}", res2);
 }
 
+pub fn part2(mut input: String) {
+    input.pop(); // removes the trailing \n
+    let insts = input.split(',').map(|x| x.parse::<isize>().unwrap()).collect::<Vec<isize>>();
+    let res = process(insts, 5); 
+    println!("Solution part 2: {:?}", res);
+}
 
 #[cfg(test)]
 mod tests {

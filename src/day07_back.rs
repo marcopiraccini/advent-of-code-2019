@@ -7,7 +7,8 @@ struct Program {
     done: bool
 }
 
-fn process(p: &mut Program, input: isize, is_setup: bool ) -> isize {
+fn process(p: &mut Program, phase: isize, input: isize) -> isize {
+    let mut phase_added = false;
     while p.insts[p.curr] != 99 {
         let op = p.insts[p.curr] % 100;
         let first_direct = ((p.insts[p.curr] / 100) % 10) == 1; 
@@ -29,11 +30,13 @@ fn process(p: &mut Program, input: isize, is_setup: bool ) -> isize {
             },
             3 => {
                 let target = p.insts[p.curr + 1] as usize; 
-                p.insts[target] = input;    
+                if !phase_added {
+                    p.insts[target] = phase;
+                    phase_added = true;
+                } else {
+                    p.insts[target] = input;
+                };
                 p.curr += 2;
-                if is_setup {
-                    return 0;
-                }
             },
             4 => {
                 let first = if first_direct {p.insts[p.curr + 1]} else { p.insts[p.insts[p.curr + 1] as usize] };
@@ -94,17 +97,11 @@ fn process_perm(program: &Program, perm:Vec<isize>) -> isize {
     let mut program2 = program.clone();
     let mut program3 = program.clone();
     let mut program4 = program.clone();
-    // phase setup
-    process(&mut program0, perm[0], true);
-    process(&mut program1, perm[1], true);
-    process(&mut program2, perm[2], true);
-    process(&mut program3, perm[3], true);
-    process(&mut program4, perm[4], true);
-    let res0 = process(&mut program0, 0, false);
-    let res1 = process(&mut program1, res0, false);
-    let res2 = process(&mut program2, res1, false);
-    let res3 = process(&mut program3, res2, false);
-    process(&mut program4, res3, false)
+    let res0 = process(&mut program0, perm[0], 0);
+    let res1 = process(&mut program1, perm[1], res0);
+    let res2 = process(&mut program2, perm[2], res1);
+    let res3 = process(&mut program3, perm[3], res2);
+    process(&mut program4, perm[4], res3)
 }
 
 pub fn part1(mut input: String) {
@@ -132,18 +129,14 @@ fn process_perm2(program: &Program, perm:Vec<isize>) -> isize {
        let mut program3 = program.clone();
        let mut program4 = program.clone();
        let mut input = 0;
-       process(&mut program0, perm[0], true);
-       process(&mut program1, perm[1], true);
-       process(&mut program2, perm[2], true);
-       process(&mut program3, perm[3], true);
-       process(&mut program4, perm[4], true);
        loop {
-           let res0 = process(&mut program0, input, false);
-           let res1 = process(&mut program1, res0, false);
-           let res2 = process(&mut program2, res1, false);
-           let res3 = process(&mut program3, res2, false);
-           let res4 = process(&mut program4, res3, false);
+           let res0 = process(&mut program0, perm[0], input);
+           let res1 = process(&mut program1, perm[1], res0);
+           let res2 = process(&mut program2, perm[2], res1);
+           let res3 = process(&mut program3, perm[3], res2);
+           let res4 = process(&mut program4, perm[4], res3);
            if program4.done {
+               println!("done!, {}, {}, {}, {}, {}", program4.done, program3.done, program2.done, program1.done, program0.done);
                return input;
            }
            input = res4;
@@ -166,6 +159,9 @@ pub fn part2(mut input: String) {
 }
 
 
+// Max thruster signal 43210 (from phase setting sequence 4,3,2,1,0):
+// 3,15,3,16,1002,16,10,16,1,16,15,15,4,15,99,0,0
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -180,7 +176,6 @@ mod tests {
         let res = process_perm(&prog, perm);
         assert_eq!(res, 43210);
     }
-
     #[test]
     fn day07_part2() {
         let insts = vec![3,26,1001,26,-4,26,3,27,1002,27,2,27,1,27,26,27,4,27,1001,28,-1,28,1005,28,6,99,0,0,5];

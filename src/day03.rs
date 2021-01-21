@@ -148,7 +148,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_day03_part1() {
+    fn day03_part1() {
         let input =
             "R75,D30,R83,U83,L12,D49,R71,U7,L72\nU62,R66,U55,R34,D71,R55,D58,R83".to_string();
         let min = _part1(input);

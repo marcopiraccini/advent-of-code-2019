@@ -65,7 +65,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_day02_part1() {
+    fn day02_part1() {
         // vec! macro: ioc.rust-lang.org/std/macro.vec.html
         // Also, we cannot compare vectors directly, but we can compare slices:
         let mut res = process(vec![1, 0, 0, 0, 99]);

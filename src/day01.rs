@@ -27,7 +27,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_fuel2() {
+    fn day01_part2() {
         assert_eq!(fuel2(14), 2);
         assert_eq!(fuel2(1969), 966);
         assert_eq!(fuel2(100756), 50346);

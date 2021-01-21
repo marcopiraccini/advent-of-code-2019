@@ -75,14 +75,14 @@ mod tests {
     use super::*;
 
     #[test]
-    fn day4_part1_test() {
+    fn day04_part1() {
         assert_eq!(is_pwd(111111), true);
         assert_eq!(is_pwd(223450), false);
         assert_eq!(is_pwd(123789), false);
     }
 
     #[test]
-    fn day4_part2_test() {
+    fn day04_part2() {
         // assert_eq!(is_pwd2(112233), true);
         assert_eq!(is_pwd2(123444), false);
         // assert_eq!(is_pwd2(111122), true);

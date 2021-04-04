@@ -1,15 +1,15 @@
 use std::convert::TryFrom;
 
 #[derive(Clone, Debug)]
-struct Program {
+pub struct Program {
     insts: Vec<i128>,
     curr: usize,
     base: usize,
-    done: bool,
+    pub done: bool,
 }
 
 impl Program {
-    fn init(insts: Vec<i128>) -> Program {
+    pub fn init(insts: Vec<i128>) -> Program {
         Program {
             insts,
             curr: 0,
@@ -63,7 +63,7 @@ impl Program {
         }
     }
 
-    fn process(&mut self, input: i128, is_setup: bool) -> i128 {
+    pub fn process(&mut self, input: i128, is_setup: bool) -> i128 {
         while self.get_curr() != 99 {
             let op = self.get_curr() % 100;
             let first_mode = (self.get_curr() / 100) % 10;
@@ -85,7 +85,6 @@ impl Program {
                     self.inc(4);
                 }
                 3 => {
-                    println!("INPUT: {}", input);
                     let target = self.get_index(first_mode, 1) as usize;
                     self.set(target, input);
                     self.inc(2);
@@ -96,7 +95,7 @@ impl Program {
                 4 => {
                     let first = self.get_param(first_mode, 1);
                     self.inc(2);
-                    println!("OUTPUT: {}", first);
+                    return first;
                 }
                 5 => {
                     let first = self.get_param(first_mode, 1);
@@ -155,12 +154,16 @@ impl Program {
     }
 }
 
-pub fn process(mut input: String, start: i128, is_setup: bool) {
+pub fn get_program(mut input: String) -> Program {
     input.pop();
     let insts = input
         .split(',')
         .map(|x| x.parse::<i128>().unwrap())
         .collect::<Vec<i128>>();
-    let mut program = Program::init(insts);
-    program.process(start, is_setup);
+    Program::init(insts)
+}
+
+pub fn process(input: String, start: i128, is_setup: bool) -> i128 {
+    let mut program = get_program(input);
+    program.process(start, is_setup)
 }

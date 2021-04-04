@@ -1,9 +1,11 @@
 use crate::intcode;
 
 pub fn part1(input: String) {
-    intcode::process(input, 1, false);
+    let res = intcode::process(input, 1, false);
+    println!("Solution: {:?}", res);
 }
 
 pub fn part2(input: String) {
-    intcode::process(input, 2, false);
+    let res = intcode::process(input, 2, false);
+    println!("Solution: {:?}", res);
 }

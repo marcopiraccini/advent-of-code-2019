@@ -32,7 +32,7 @@ pub fn get_day(day: u32) -> (DayFn, DayFn) {
         10 => (day10::part1, day10::part2),
         11 => (day11::part1, day11::part2),
         12 => (day12::part1, day12::part2),
-        13 => (day13::part1, noop),
+        13 => (day13::part1, day13::part2),
         _ => {
             println!("Unknown day: {}", day);
             (noop, noop)

@@ -1,4 +1,5 @@
 use crate::intcode;
+use std::collections::HashMap;
 use std::collections::HashSet;
 use std::collections::VecDeque;
 use std::hash::{Hash, Hasher};
@@ -9,6 +10,7 @@ const WEST: i128 = 3;
 const EAST: i128 = 4;
 const DIRECTIONS: [i128; 4] = [NORTH, SOUTH, EAST, WEST];
 
+#[derive(Clone, Debug)]
 struct Visited {
     visited: HashSet<(isize, isize)>,
 }
@@ -70,37 +72,66 @@ fn create_node(prev: &Node, dir: i128) -> Node {
     }
 }
 
-pub fn part1(input: String) {
-    let program = intcode::get_program(input);
+// Explore the from (x,y) and return a map with (x, y) => status and the node with oxygen
+fn explore_map(input: String) -> (HashMap<(isize, isize), i128>, Node) {
+    let mut found: HashMap<(isize, isize), i128> = HashMap::new();
     let mut queue: VecDeque<Node> = VecDeque::new();
     let mut visited = Visited::init();
-    let start = Node::init(0, 0, 0, program);
+    let mut oxygen: Option<Node> = None;
+    let start = Node::init(0, 0, 0, intcode::get_program(input));
     visited.insert(&start);
     queue.push_back(start);
-    let mut found: Option<Node> = None;
-    // Breadth first, for each node in the queue:
-    // - pop the node
-    // - get the status in every direction
-    // - if a node has already been visited, wkip
-    // - if status is 2, found
-    // - if status is 1, add the node to the end of the queue
-    while found.is_none() {
+    while queue.len() != 0 {
         let current = queue.pop_front().unwrap();
         for dir in DIRECTIONS.iter() {
             let mut node = create_node(&current, *dir);
-            let status = node.program.process(*dir, false);
             if visited.contains(&node) {
                 continue;
             }
-            if status == 2 {
-                found = Some(node.clone());
+            let status = node.program.process(*dir, false);
+            if status != 0 {
+                visited.insert(&node);
+                found.insert((node.x, node.y), status);
+                if status == 2 {
+                    oxygen = Some(node.clone());
+                }
+                queue.push_back(node);
             }
-            if status == 1 {
+        }
+    }
+    (found, oxygen.unwrap())
+}
+
+pub fn part1(input: String) {
+    let (_, oxygen) = explore_map(input);
+    println!("Solution: {:?}", oxygen.distance);
+}
+
+pub fn part2(input: String) {
+    // From the oxygen, run the same algorithm until all the map is done.
+    // The solution is the distance of the last node found.
+    let (map, oxygen) = explore_map(input.clone());
+    let program = intcode::get_program(input); // We are not using this
+    let mut queue: VecDeque<Node> = VecDeque::new();
+    let mut visited = Visited::init();
+    let start = Node::init(oxygen.x, oxygen.y, 0, program);
+    let mut last_node = start.clone();
+    visited.insert(&start);
+    queue.push_back(start);
+    while queue.len() != 0 {
+        let current = queue.pop_front().unwrap();
+        for dir in DIRECTIONS.iter() {
+            let node = create_node(&current, *dir);
+            let status = map.get(&(node.x, node.y));
+            if visited.contains(&node) {
+                continue;
+            }
+            if status.is_some() && *status.unwrap() != 0 {
+                last_node = node.clone();
                 visited.insert(&node);
                 queue.push_back(node);
             }
         }
     }
-
-    println!("Solution: {:?}", found.unwrap().distance);
+    println!("Solution {:?}", last_node.distance);
 }
